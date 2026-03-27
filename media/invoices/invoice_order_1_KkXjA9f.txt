@@ -1,0 +1,14 @@
+Order ID: 1
+User: krishna2 (llleelakrishna12@gmail.com)
+Full Name: Leela Krishna Lethavadla
+Address: spn, gutr, ap - 676009
+
+Items:
+ - USB-C Hub x3 @ ₹79.00 = ₹237.00
+ - USB-C Hub x1 @ ₹79.00 = ₹79.00
+
+Subtotal: ₹316.00
+Tax (10%): ₹31.60
+Total: ₹347.60
+
+Thank you for your purchase!

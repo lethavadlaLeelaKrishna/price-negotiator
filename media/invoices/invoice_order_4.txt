@@ -1,0 +1,13 @@
+Order ID: 4
+User: admin2 (samba12@gmail.com)
+Full Name: samba
+Address: vij, vij, Up - 564021
+
+Items:
+ - Unisex Baseball Cap x30 @ ₹18.00 = ₹540.00
+
+Subtotal: ₹540.00
+Tax (10%): ₹54.00
+Total: ₹594.00
+
+Thank you for your purchase!

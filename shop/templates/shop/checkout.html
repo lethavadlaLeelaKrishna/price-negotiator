@@ -1,0 +1,368 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Checkout - Price Negotiator{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-5">
+        <div class="col text-white">
+            <h1 class="display-5 fw-bold">
+                <i class="fas fa-lock"></i> Secure Checkout
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Order Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Order Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Original Price</th>
+                                    <th>Negotiated Price</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_items %}
+                                    <tr>
+                                        <td>{{ item.product.name }}</td>
+                                        <td>₹{{ item.original_price }}</td>
+                                        <td>
+                                            <span style="color: var(--success-color); font-weight: bold;">
+                                                ₹{{ item.negotiated_price }}
+                                            </span>
+                                        </td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>₹{{ item.get_total_price }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Address -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-map-marker-alt"></i> Billing Address
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="billingForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" name="full_name" id="fullNameInput" value="{{ user.get_full_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" id="emailInput" value="{{ user.email }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" name="address" placeholder="Street address">
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" name="city" placeholder="City">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-control" name="state" placeholder="State">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">ZIP Code</label>
+                                <input type="text" class="form-control" name="zip_code" placeholder="ZIP">
+                            </div>
+                        </div>
+
+                        <button type="button" id="saveBillingBtn" class="btn btn-primary w-100">
+                            <i class="fas fa-check"></i> Save Address
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card"></i> Payment Method
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="paymentForm">
+                        {% csrf_token %}
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="payment" id="credit" value="credit" checked>
+                            <label class="form-check-label" for="credit">
+                                <i class="fas fa-credit-card"></i> Credit/Debit Card
+                            </label>
+                        </div>
+
+                        <div id="cardDetails">
+                            <div class="mb-3">
+                                <label class="form-label">Cardholder Name</label>
+                                <input type="text" class="form-control" name="cardholder_name" placeholder="Name on card">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Card Number</label>
+                                <input type="text" class="form-control" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Expiry Date</label>
+                                    <input type="text" class="form-control" name="expiry_date" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CVV</label>
+                                    <input type="text" class="form-control" name="cvv" placeholder="123" maxlength="4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mt-3 mb-4">
+                            <input class="form-check-input" type="checkbox" name="terms" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the terms and conditions
+                            </label>
+                        </div>
+
+                        <button type="button" id="continuePaymentBtn" class="btn btn-primary w-100">
+                            <i class="fas fa-arrow-right"></i> Continue to Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Total -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 80px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-receipt"></i> Order Total
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="row mb-2">
+                            <div class="col">Subtotal:</div>
+                            <div class="col-auto">₹{{ total|floatformat:2 }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col">Shipping:</div>
+                            <div class="col-auto">₹9.99</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col">Tax (10%):</div>
+                            <div class="col-auto">₹{{ tax|floatformat:2 }}</div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row" style="font-size: 1.3rem;">
+                        <div class="col">
+                            <strong>Total:</strong>
+                        </div>
+                        <div class="col-auto" style="color: var(--success-color);">
+                            <strong>₹{{ final_total|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Savings Info -->
+                    <div class="alert alert-success mt-3" role="alert">
+                        <i class="fas fa-leaf"></i>
+                        <strong>You saved money!</strong>
+                        <p class="mb-0 small mt-2">
+                            Through smart price negotiations, you got excellent deals on all your items.
+                        </p>
+                    </div>
+
+                    <form method="POST" class="mt-4" id="finalCheckoutForm">
+                        {% csrf_token %}
+                        <button type="submit" id="completePurchaseBtn" class="btn btn-success btn-lg w-100 mb-2" disabled>
+                            <i class="fas fa-check-circle"></i> Complete Purchase
+                        </button>
+                    </form>
+
+                    <a href="{% url 'shop:view_cart' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left"></i> Back to Cart
+                    </a>
+
+                    <!-- Trust Badges -->
+                    <div class="mt-4 text-center text-muted small">
+                        <p><i class="fas fa-lock"></i> Secure checkout (SSL)</p>
+                        <p><i class="fas fa-shield-alt"></i> Your data is protected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.getElementById('saveBillingBtn').addEventListener('click', async () => {
+    const fullName = document.getElementById('fullNameInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
+    const address = document.querySelector('input[name="address"]').value.trim();
+    const city = document.querySelector('input[name="city"]').value.trim();
+    const state = document.querySelector('input[name="state"]').value.trim();
+    const zip_code = document.querySelector('input[name="zip_code"]').value.trim();
+
+    if (!fullName || !email || !address) {
+        alert('Please provide Full Name, Email and Address.');
+        return;
+    }
+
+    const btn = document.getElementById('saveBillingBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    try {
+        const response = await fetch('{% url "save_billing" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ full_name: fullName, email: email, address: address, city: city, state: state, zip_code: zip_code })
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert('Billing address saved.');
+        } else {
+            alert('Error: ' + (data.message || 'Could not save billing'));
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error saving billing address.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check"></i> Save Address';
+});
+
+// Validate payment fields
+function validateCardDetails() {
+    const cardholder = document.querySelector('input[name="cardholder_name"]').value.trim();
+    const cardnum = document.querySelector('input[name="card_number"]').value.replace(/\s+/g, '');
+    const expiry = document.querySelector('input[name="expiry_date"]').value.trim();
+    const cvv = document.querySelector('input[name="cvv"]').value.trim();
+
+    if (!cardholder) return { ok: false, msg: 'Please enter cardholder name' };
+    if (!/^[0-9]{12,19}$/.test(cardnum)) return { ok: false, msg: 'Please enter a valid card number' };
+    if (!/^(0[1-9]|1[0-2])\/(\d{2})$/.test(expiry)) return { ok: false, msg: 'Expiry must be MM/YY' };
+    // check expiry not in past
+    const parts = expiry.split('/');
+    const mm = parseInt(parts[0], 10);
+    const yy = parseInt('20' + parts[1], 10);
+    const expDate = new Date(yy, mm - 1 + 1, 1); // month after expiry
+    if (expDate <= new Date()) return { ok: false, msg: 'Card has expired' };
+    if (!/^[0-9]{3,4}$/.test(cvv)) return { ok: false, msg: 'Please enter a valid CVV' };
+
+    return { ok: true };
+}
+
+document.getElementById('continuePaymentBtn').addEventListener('click', async () => {
+    // Ensure billing fields present; save them to session
+    const fullName = document.getElementById('fullNameInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
+    const address = document.querySelector('input[name="address"]').value.trim();
+
+    if (!fullName || !email || !address) {
+        alert('Please fill and save your billing address before continuing to payment.');
+        return;
+    }
+
+    // Save billing (ensure session has it)
+    try {
+        const saveResp = await fetch('{% url "save_billing" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                full_name: fullName,
+                email: email,
+                address: address,
+                city: document.querySelector('input[name="city"]').value.trim(),
+                state: document.querySelector('input[name="state"]').value.trim(),
+                zip_code: document.querySelector('input[name="zip_code"]').value.trim()
+            })
+        });
+
+        const saveData = await saveResp.json();
+        if (saveData.status !== 'success') {
+            alert('Could not save billing address: ' + (saveData.message || ''));
+            return;
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error saving billing address.');
+        return;
+    }
+
+    // Validate payment details
+    const valid = validateCardDetails();
+    if (!valid.ok) {
+        alert(valid.msg);
+        return;
+    }
+
+    // Payment details look ok — enable final purchase button and scroll to it
+    const completeBtn = document.getElementById('completePurchaseBtn');
+    completeBtn.disabled = false;
+    completeBtn.focus();
+
+    // Show a short confirmation message
+    const notice = document.createElement('div');
+    notice.className = 'alert alert-success mt-3';
+    notice.textContent = 'Payment details verified. Click Complete Purchase to finish.';
+    const cardBody = document.querySelector('.card.sticky-top .card-body');
+    cardBody.insertBefore(notice, cardBody.firstChild);
+
+    // Scroll into view
+    completeBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+</script>
+{% endblock %}

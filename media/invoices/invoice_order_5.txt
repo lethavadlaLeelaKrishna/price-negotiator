@@ -1,0 +1,15 @@
+Order ID: 5
+User: siddu12 (llleelakrishna12@gmail.com)
+Full Name: Leela Krishna Lethavadla
+Address: kondrapadu, ggguntur, fdggg - 522252
+
+Items:
+ - Women's Cashmere Scarf x20 @ ₹79.00 = ₹1580.00
+ - Men's Quilted Jacket x188 @ ₹84.99 = ₹15978.12
+ - Men's Quilted Jacket x1 @ ₹84.99 = ₹84.99
+
+Subtotal: ₹17643.11
+Tax (10%): ₹1764.31
+Total: ₹19407.42
+
+Thank you for your purchase!

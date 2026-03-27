@@ -1,0 +1,14 @@
+Order ID: 5
+User: admin (admin@example.com)
+Full Name: Leela Krishna Lethavadla
+Address: kondrapadu, guntur r, ap - 676676
+
+Items:
+ - Bathroom Towel Set x1 @ ₹1700.00 = ₹1700.00
+ - Scented Soy Candles x1 @ ₹1275.00 = ₹1275.00
+
+Subtotal: ₹2975.00
+Tax (10%): ₹297.50
+Total: ₹3272.50
+
+Thank you for your purchase!

@@ -1,0 +1,13 @@
+Order ID: 1
+User: tester ()
+Full Name: 
+Address: , ,  - 
+
+Items:
+ - Test Product x1 @ ₹75.00 = ₹75.00
+
+Subtotal: ₹75.00
+Tax (10%): ₹7.50
+Total: ₹82.50
+
+Thank you for your purchase!

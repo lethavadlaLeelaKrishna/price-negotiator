@@ -1,0 +1,145 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Shopping Cart - Price Negotiator{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-5">
+        <div class="col text-white">
+            <h1 class="display-5 fw-bold">
+                <i class="fas fa-shopping-cart"></i> Your Cart
+            </h1>
+        </div>
+    </div>
+
+    {% if cart_items %}
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Cart Items -->
+                {% for item in cart_items %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center">
+                                    <div style="font-size: 2.5rem; color: var(--primary-color);">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <h5 class="card-title mb-1">{{ item.product.name }}</h5>
+                                    <p class="text-muted small mb-1">Product ID: {{ item.product.id }}</p>
+                                    {% if item.negotiation_session %}
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle"></i> 
+                                            Negotiated Price
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <div>
+                                        <strong>Qty: {{ item.quantity }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <div>
+                                        <div class="text-muted small">
+                                            <s>₹{{ item.original_price }}</s>
+                                        </div>
+                                        <div style="font-size: 1.3rem; color: var(--success-color); font-weight: bold;">
+                                            ₹{{ item.negotiated_price }}
+                                        </div>
+                                        <div class="text-success small">
+                                            Total: ₹{{ item.get_total_price }}
+                                        </div>
+                                        <div class="mt-2">
+                                            <form action="{% url 'shop:remove_from_cart' item.id %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove item">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 80px;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-receipt"></i> Order Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% with cart_items|length as item_count %}
+                            <p class="mb-2">
+                                <strong>Items:</strong> {{ item_count }}
+                            </p>
+                        {% endwith %}
+
+                        <hr>
+
+                        <div class="mb-3">
+                            {% with total_saved=0 %}
+                                {% for item in cart_items %}
+                                    {% widthratio item.original_price item.negotiated_price 1 as ratio %}
+                                    <!-- Savings calculation would go here -->
+                                {% endfor %}
+                                <p class="text-muted small">
+                                    <i class="fas fa-leaf"></i>
+                                    Great deals negotiated!
+                                </p>
+                            {% endwith %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">Subtotal:</div>
+                            <div class="col-6 text-end">₹{{ total|floatformat:2 }}</div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">Tax (10%):</div>
+                            <div class="col-6 text-end">₹{{ tax|floatformat:2 }}</div>
+                        </div>
+
+                        <div class="row mb-3 border-top pt-3" style="font-size: 1.3rem;">
+                            <div class="col-6">
+                                <strong>Total:</strong>
+                            </div>
+                            <div class="col-6 text-end" style="color: var(--success-color);">
+                                <strong>₹{{ final_total|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'shop:checkout' %}" class="btn btn-primary w-100 btn-lg mb-2">
+                            <i class="fas fa-lock"></i> Proceed to Checkout
+                        </a>
+
+                        <a href="/" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-arrow-left"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-lg-6 mx-auto text-center">
+                <div class="card bg-transparent border-white border-2 py-5 text-white">
+                    <i class="fas fa-shopping-cart fa-5x mb-3" style="opacity: 0.5;"></i>
+                    <h3>Your Cart is Empty</h3>
+                    <p class="mb-4">Start negotiating prices on amazing products!</p>
+                    <a href="/" class="btn btn-primary btn-lg">
+                        <i class="fas fa-tags"></i> Browse Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

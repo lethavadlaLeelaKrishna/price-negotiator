@@ -1,0 +1,14 @@
+Order ID: 7
+User: sivalakshmi (sivalk12@gmail.com)
+Full Name: siva lakshmi
+Address: kondrapadu, guntur, up - 525521
+
+Items:
+ - Women's Summer Dress x1 @ ₹42.49 = ₹42.49
+ - Women's Summer Dress x10 @ ₹42.49 = ₹424.90
+
+Subtotal: ₹467.39
+Tax (10%): ₹46.74
+Total: ₹514.13
+
+Thank you for your purchase!

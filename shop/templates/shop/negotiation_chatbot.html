@@ -1,0 +1,802 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Negotiate {{ product.name }} - Price Negotiator{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="overflow-x: hidden;">
+    <div class="row" style="min-height: calc(100vh - 100px);">
+        <!-- Product Info Sidebar -->
+        <div class="col-lg-3 mb-4 mb-lg-0" style="max-height: calc(100vh - 100px); overflow-y: auto;">
+            <div class="card shadow-sm border-0" style="position: relative; top: 0;">
+                <div class="product-image bg-light" style="height: 200px; display:flex; align-items:center; justify-content:center;">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height:180px; object-fit:contain; width:100%;">
+                    {% else %}
+                        <i class="fas fa-box fa-3x text-muted"></i>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">{{ product.name }}</h5>
+                    
+                    <div class="mb-4">
+                        <p class="text-muted small text-uppercase mb-1" style="letter-spacing: 1px;">Original Price</p>
+                        <div class="price-display h2">₹{{ negotiation.original_price }}</div>
+                    </div>
+
+                    <div class="mb-3" id="agreementContainer" style="display:none;">
+                        <p class="text-muted small mb-1">Agreed Price</p>
+                        <div style="font-size: 2rem; color: var(--success-color); font-weight: bold;">
+                            ₹<span id="agreedPrice">0</span>
+                        </div>
+                        <div class="discount-badge" style="width: 100%; text-align: center;">
+                            <i class="fas fa-percentage"></i>
+                            <span id="agreeDiscount">0</span>% OFF
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Session Status</p>
+                        <span class="badge" id="sessionStatus" style="font-size: 0.9rem; padding: 8px 12px;">
+                            Active
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Offer Count</p>
+                        <p id="offerCount" class="mb-0"><strong>0</strong> offers made</p>
+                    </div>
+
+                    <!-- Add to Cart Section - Always Visible -->
+                    <div id="addToCartSection" style="margin-top: 20px;">
+                        <div class="mb-3">
+                            <label for="cartQuantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="cartQuantity" name="quantity" value="1" min="1" max="{{ product.stock }}" style="color: black;">
+                        </div>
+                        <button id="addToCartBtn" type="button" class="btn btn-success w-100" style="font-weight: 600; padding: 10px;"
+                            {% if negotiation.status != 'accepted' %} disabled {% endif %}>
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                        <small id="cartStatus" class="d-block mt-2 text-center"></small>
+                    </div>
+
+                    <hr>
+                    <a href="/" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-lg-9" style="display: flex; flex-direction: column; max-height: calc(100vh - 100px);">
+            <div style="flex: 1; overflow-y: auto; margin-bottom: 20px;">
+                <!-- Chat Messages -->
+                <div style="width: 100%;">
+                    <div class="chat-container" id="chatContainer">
+                        <div class="chat-message">
+                            <div class="message-content bot-message" style="width: 100%;">
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <i class="fas fa-robot"></i>
+                                    <div>
+                                        <strong>ChatBot</strong><br>
+                                        <small>Hi! I'm ready to negotiate. What's your best offer for {{ product.name }}? 💬</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <!-- Input Area -->
+                <div style="flex-shrink: 0; width: 100%; margin-top: auto;">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Text Input Tab -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="priceInput" class="form-label text-muted small text-uppercase">Your Price Offer (₹)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0">₹</span>
+                                        <input type="number" class="form-control border-start-0 ps-0" id="priceInput" 
+                                               placeholder="Enter price" step="0.01" 
+                                               min="{{ product.minimum_price }}"
+                                               max="{{ product.original_price }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="messageInput" class="form-label text-muted small text-uppercase">Your Message (Optional)</label>
+                                     <input type="text" class="form-control" id="messageInput" 
+                                         placeholder="E.g., This is my best offer...">
+                                </div>
+                            </div>
+
+                            <!-- Tabs for Input Methods -->
+                            <ul class="nav nav-tabs mb-3" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="textTab" data-bs-toggle="tab" 
+                                            data-bs-target="#textMethod" type="button" role="tab">
+                                        <i class="fas fa-keyboard"></i> Text Offer
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="voiceTab" data-bs-toggle="tab" 
+                                            data-bs-target="#voiceMethod" type="button" role="tab">
+                                        <i class="fas fa-microphone"></i> Voice Offer
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content">
+                                <!-- Text Method -->
+                                <div class="tab-pane fade show active" id="textMethod" role="tabpanel">
+                                    <div class="d-flex gap-2">
+                                        <button id="submitTextBtn" class="btn btn-primary flex-grow-1">
+                                            <i class="fas fa-paper-plane"></i> Send Offer
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" 
+                                                data-bs-target="#quickPricesModal">
+                                            <i class="fas fa-lightning-bolt"></i> Quick Prices
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Voice Method -->
+                                <div class="tab-pane fade" id="voiceMethod" role="tabpanel">
+                                    <div class="text-center">
+                                        <p class="text-muted mb-3">
+                                            <i class="fas fa-info-circle"></i>
+                                            Click the microphone to record your offer. We'll convert it to text and send to chatbot.
+                                        </p>
+                                        <button id="voiceRecordBtn" class="voice-button mx-auto" type="button">
+                                            <i class="fas fa-microphone"></i>
+                                        </button>
+                                        <div id="voiceStatus" class="mt-2 text-muted small" style="min-height: 20px;"></div>
+                                        <div id="voiceTranscript" class="mt-3 p-3 bg-light rounded border" style="display: none;">
+                                            <div class="text-muted small mb-2 text-uppercase">Audio Transcript:</div>
+                                            <div id="transcriptText" class="fw-bold text-dark"></div>
+                                        </div>
+                                        <div id="processingIndicator" class="mt-3" style="display: none;">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Processing...</span>
+                                            </div>
+                                            <p class="text-primary mt-2 small"><i class="fas fa-sync fa-spin"></i> Converting audio to text...</p>
+                                        </div>
+                                        <div class="d-flex gap-2 mt-4" id="voiceActionButtons" style="display: none;">
+                                            <button id="voiceSendBtn" class="btn btn-primary flex-grow-1">
+                                                <i class="fas fa-paper-plane"></i> Send Voice Message
+                                            </button>
+                                            <button id="voiceClearBtn" class="btn btn-outline-secondary">
+                                                <i class="fas fa-times"></i> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Prices Modal -->
+<div class="modal fade" id="quickPricesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Price Suggestions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Quick discount suggestions:</p>
+                <div class="d-grid gap-2" id="quickPricesList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const sessionId = '{{ negotiation.session_id }}';
+const originalPrice = parseFloat('{{ negotiation.original_price }}');
+const minimumPrice = parseFloat('{{ product.minimum_price }}');
+const productId = {{ product.id }};
+const initialSessionStatus = '{{ negotiation.status|default:"active" }}';
+const initialFinalAgreedPrice = {{ negotiation.final_agreed_price|default:'null' }};
+const initialDiscount = {{ negotiation.discount_percentage|default:'0' }};
+
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+// Initialize quick prices modal
+function initQuickPrices() {
+    const discounts = [5, 10, 15, 20, 25, 30];
+    const quickPricesList = document.getElementById('quickPricesList');
+    quickPricesList.innerHTML = '';
+    
+    discounts.forEach(discount => {
+        const price = (originalPrice * (1 - discount / 100)).toFixed(2);
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline-primary';
+        btn.type = 'button';
+    btn.innerHTML = `${discount}% off - ₹${price}`;
+        btn.onclick = () => {
+            document.getElementById('priceInput').value = price;
+            bootstrap.Modal.getInstance(document.getElementById('quickPricesModal')).hide();
+            document.getElementById('submitTextBtn').click();
+        };
+        quickPricesList.appendChild(btn);
+    });
+}
+
+    // Text offer submission
+    document.getElementById('submitTextBtn').addEventListener('click', () => submitOffer());
+
+    // Unified submission function
+    async function submitOffer() {
+        const priceInput = document.getElementById('priceInput');
+        const messageInput = document.getElementById('messageInput');
+        
+        const priceVal = parseFloat(priceInput.value);
+        const messageVal = messageInput.value.trim();
+        
+        // Validation: Must have either a valid price OR a message
+        if ((!priceVal || priceVal <= 0) && !messageVal) {
+            alert('Please enter a price offer or a message');
+            return;
+        }
+        
+        if (priceVal && priceVal > originalPrice) {
+            alert('Price must be less than original price');
+            return;
+        }
+        
+        // Add user message to chat
+        let displayMsg = '';
+        if (priceVal > 0) displayMsg += `My offer: ₹${priceVal.toFixed(2)}`;
+        if (messageVal) displayMsg += (displayMsg ? ' - ' : '') + messageVal;
+        
+        addChatMessage('user', displayMsg);
+        
+        try {
+            const payload = {
+                message: messageVal
+            };
+            if (priceVal > 0) payload.offered_price = priceVal;
+
+            const response = await fetch(`/shop/send-text-offer/${sessionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                addChatMessage('bot', data.bot_response);
+                updateSessionStatus(data.offer_status, data.discount);
+                
+                if (data.offer_status === 'accepted') {
+                    // Use the agreed price from response or the offer
+                    const finalPrice = data.counter_offer || priceVal || (originalPrice * (1 - data.discount/100));
+                    updateAgreement(finalPrice, data.discount);
+                    
+                    const btn = document.getElementById('submitTextBtn');
+                    btn.disabled = true;
+                    btn.innerHTML = '✓ Deal Accepted!';
+                    
+                    // Also disable voice send if active
+                    const vBtn = document.getElementById('voiceSendBtn');
+                    if (vBtn) vBtn.disabled = true;
+                }
+            } else {
+                 addChatMessage('bot', '❌ ' + (data.message || 'Error processing your offer.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            addChatMessage('bot', '❌ Error processing your offer. Please try again.');
+        }
+        
+        // Clear inputs
+        priceInput.value = '';
+        messageInput.value = '';
+        
+        // Reset voice UI if it was used
+        if (document.getElementById('voiceActionButtons').style.display !== 'none') {
+             document.getElementById('voiceClearBtn').click();
+        }
+    }
+
+// Voice recording with speech-to-text
+let recognition = null;
+let isListening = false;
+let currentTranscript = '';
+let finalVoiceTranscript = '';
+
+// Initialize Web Speech API
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.error('Speech Recognition not supported');
+        alert('Speech Recognition is not supported in your browser. Please use Chrome, Edge, or Firefox.');
+        return false;
+    }
+    
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    
+    let interimTranscript = '';
+    let finalTranscript = '';
+    
+    recognition.onstart = () => {
+        isListening = true;
+        const btn = document.getElementById('voiceRecordBtn');
+        btn.classList.add('recording');
+        btn.innerHTML = '<i class="fas fa-stop-circle"></i>';
+        document.getElementById('voiceStatus').innerHTML = '<i class="fas fa-microphone-alt"></i> <strong>Listening...</strong>';
+        document.getElementById('voiceTranscript').style.display = 'block';
+        document.getElementById('voiceActionButtons').style.display = 'none';
+        interimTranscript = '';
+        finalTranscript = '';
+        
+        // Reset silence timeout
+        clearTimeout(silenceTimeout);
+    };
+    
+    recognition.onresult = (event) => {
+        // Clear silence timeout on speech
+        clearTimeout(silenceTimeout);
+        
+        interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' ';
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        
+        // Display interim results
+        const displayText = finalTranscript + interimTranscript;
+        document.getElementById('transcriptText').textContent = displayText || 'Listening...';
+        currentTranscript = displayText;
+        
+        // Auto-stop after 3 seconds of silence
+        silenceTimeout = setTimeout(() => {
+            if (isListening) {
+                recognition.stop();
+            }
+        }, 3000);
+    };
+    
+    recognition.onerror = (event) => {
+        document.getElementById('voiceStatus').innerHTML = `<span class="text-danger">❌ Error: ${event.error}</span>`;
+    };
+    
+    recognition.onend = () => {
+        isListening = false;
+        const btn = document.getElementById('voiceRecordBtn');
+        btn.classList.remove('recording');
+        btn.innerHTML = '<i class="fas fa-microphone"></i>';
+        btn.disabled = false;
+        
+        if (currentTranscript.trim()) {
+            finalVoiceTranscript = currentTranscript.trim();
+            document.getElementById('voiceStatus').innerHTML = `
+                <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; margin: 12px 0;">
+                    <i class="fas fa-check-circle" style="color: #22c55e; margin-right: 8px;"></i> 
+                    <strong style="color: #22c55e;">Microphone OFF - Audio Captured!</strong><br>
+                    <small style="color: black; margin-top: 6px; display: block;">Your message has been recorded and converted to text.</small>
+                </div>
+            `;
+            document.getElementById('voiceActionButtons').style.display = 'flex';
+            // Populate inputs so user can review/edit before sending
+            try { populateInputsFromTranscript(finalVoiceTranscript); } catch(e) { console.warn(e); }
+        } else {
+            document.getElementById('voiceStatus').innerHTML = `
+                <div style="padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; margin: 12px 0;">
+                    <i class="fas fa-exclamation-circle" style="color: #ef4444; margin-right: 8px;"></i> 
+                    <strong style="color: #ef4444;">No Speech Detected</strong><br>
+                    <small style="color: black; margin-top: 6px; display: block;">Please try again and speak clearly.</small>
+                </div>
+            `;
+            document.getElementById('voiceActionButtons').style.display = 'none';
+        }
+    };
+    
+    return true;
+}
+
+// Send transcribed text to chatbot
+async function sendTranscribedTextToChatbot(transcript) {
+    // Add user message to chat (visual feedback)
+    addChatMessage('user', `🎤 ${transcript}`);
+
+    try {
+        // Try to extract a numeric price from transcript (digits)
+        const priceMatch = transcript.match(/\d+/);
+        let price = null;
+        if (priceMatch) price = parseFloat(priceMatch[0]);
+
+        // Build payload: only include offered_price if we actually parsed a numeric price
+        const payload = { message: transcript };
+        if (price !== null && !Number.isNaN(price)) payload.offered_price = price;
+
+        const response = await fetch(`/shop/send-text-offer/${sessionId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            addChatMessage('bot', data.bot_response);
+            updateSessionStatus(data.offer_status, data.discount);
+
+            if (data.offer_status === 'accepted') {
+                updateAgreement((payload.offered_price || originalPrice * 0.8), data.discount);
+                document.getElementById('submitTextBtn').disabled = true;
+            }
+        } else {
+            addChatMessage('bot', '❌ Could not process your voice message.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        addChatMessage('bot', '❌ Error sending your message to chatbot.');
+    }
+}
+
+// Populate input fields from transcript for user review/edit before sending
+function parseWordsToNumber(text) {
+    // Very small heuristic to parse simple number words (one..nineteen, tens, hundred, thousand)
+    const smallNums = {
+        zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9,
+        ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19
+    };
+    const tens = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
+
+    text = text.toLowerCase().replace(/[,₹$]/g, ' ');
+    // direct number digits
+    const digitMatch = text.match(/\d{1,7}(?:\.\d+)?/);
+    if (digitMatch) return parseFloat(digitMatch[0]);
+
+    const parts = text.split(/\s+/);
+    let total = 0;
+    let current = 0;
+    let found = false;
+
+    for (let w of parts) {
+        if (smallNums[w] !== undefined) { current += smallNums[w]; found = true; }
+        else if (tens[w] !== undefined) { current += tens[w]; found = true; }
+        else if (w === 'hundred') { current *= 100; found = true; }
+        else if (w === 'thousand') { current *= 1000; total += current; current = 0; found = true; }
+        else if (w.match(/^\d+$/)) { current += parseInt(w,10); found = true; }
+        else { /* ignore */ }
+    }
+    total += current;
+    return found && total > 0 ? total : null;
+}
+
+function populateInputsFromTranscript(transcript) {
+    // Fill message input
+    const msgInput = document.getElementById('messageInput');
+    const priceInput = document.getElementById('priceInput');
+    if (msgInput) msgInput.value = transcript;
+
+    // Try to parse price from words
+    const parsed = parseWordsToNumber(transcript);
+    if (parsed !== null) {
+        if (priceInput) priceInput.value = parsed.toFixed(2);
+    }
+    // Show voice action buttons so user can send or edit
+    const actionButtons = document.getElementById('voiceActionButtons');
+    if (actionButtons) actionButtons.style.display = 'flex';
+}
+
+// Auto-stop recording after silence (3 seconds)
+let silenceTimeout;
+
+// Voice recording button handler
+document.getElementById('voiceRecordBtn').addEventListener('click', async () => {
+    if (!recognition) {
+        initSpeechRecognition();
+    }
+    
+    if (!isListening) {
+        // Start listening
+        recognition.start();
+        currentTranscript = '';
+    } else {
+        // Manual stop (user clicked button)
+        recognition.stop();
+        clearTimeout(silenceTimeout);
+    }
+});
+
+// Add silence detection to auto-stop recording (Moved inside initSpeechRecognition)
+// const originalRecognitionOnResult = recognition?.onresult; 
+// ... logic removed as it's now integrated
+
+
+    // Voice Send Button Handler
+    document.getElementById('voiceSendBtn').addEventListener('click', async () => {
+        // Just call the unified submit function
+        // It reads from the inputs which were already populated by populateInputsFromTranscript
+        submitOffer();
+        
+        // Small UI cleanup (redundant but safe)
+        document.getElementById('processingIndicator').style.display = 'none';
+        document.getElementById('voiceTranscript').style.display = 'none';
+        document.getElementById('voiceStatus').innerHTML = `
+            <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; margin: 12px 0;">
+                <i class="fas fa-check-circle" style="color: #22c55e; margin-right: 8px;"></i> 
+                <strong style="color: #22c55e;">Message Sent!</strong><br>
+                <small style="color: black; margin-top: 6px; display: block;">Your message has been sent to chatbot.</small>
+            </div>
+        `;
+        document.getElementById('voiceActionButtons').style.display = 'none';
+        finalVoiceTranscript = '';
+    });
+
+// Voice Clear Button Handler
+document.getElementById('voiceClearBtn').addEventListener('click', () => {
+    finalVoiceTranscript = '';
+    currentTranscript = '';
+    document.getElementById('voiceTranscript').style.display = 'none';
+    // Clear input fields populated from transcript
+    const msgInput = document.getElementById('messageInput');
+    const priceInput = document.getElementById('priceInput');
+    if (msgInput) msgInput.value = '';
+    if (priceInput) priceInput.value = '';
+    document.getElementById('voiceStatus').innerHTML = `
+        <div style="padding: 12px; background: rgba(107, 114, 128, 0.1); border: 1px solid rgba(107, 114, 128, 0.3); border-radius: 6px; margin: 12px 0;">
+            <i class="fas fa-times-circle" style="color: #6b7280; margin-right: 8px;"></i> 
+            <strong style="color: #6b7280;">Recording Cleared</strong><br>
+            <small style="color: black; margin-top: 6px; display: block;">Click microphone to record a new message.</small>
+        </div>
+    `;
+    document.getElementById('voiceActionButtons').style.display = 'none';
+    document.getElementById('transcriptText').textContent = '';
+});
+
+
+
+function addChatMessage(sender, message) {
+    const chatContainer = document.getElementById('chatContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender === 'user' ? 'message-user' : 'bot-message'}`;
+    
+    if (sender === 'user') {
+        messageDiv.innerHTML = `
+            <div class="message-content user-message">
+                ${message}
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="message-content bot-message">
+                <strong style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-robot"></i> ChatBot
+                </strong>
+                ${message}
+            </div>
+        `;
+    }
+    
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function updateSessionStatus(status, discount) {
+    const statusBadge = document.getElementById('sessionStatus');
+    const offerCount = document.getElementById('offerCount');
+    
+    // Count current offers
+    const offerNum = document.querySelectorAll('.user-message').length;
+    offerCount.innerHTML = `<strong>${offerNum}</strong> offers made`;
+    
+    if (status === 'accepted') {
+        statusBadge.className = 'badge bg-success';
+        statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Accepted!';
+        // Enable Add to Cart when accepted
+        const addBtn = document.getElementById('addToCartBtn');
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+        }
+    } else if (status === 'counter') {
+        statusBadge.className = 'badge bg-warning';
+        statusBadge.innerHTML = '<i class="fas fa-exchange-alt"></i> Counter Offer';
+    } else {
+        statusBadge.className = 'badge bg-danger';
+        statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> Rejected';
+    }
+}
+
+function updateAgreement(price, discount) {
+    document.getElementById('agreementContainer').style.display = 'block';
+    document.getElementById('agreedPrice').textContent = price.toFixed(2);
+    document.getElementById('agreeDiscount').textContent = discount.toFixed(1);
+    // update agreed price used by Add-to-Cart
+    agreedPrice = price;
+    agreedDiscount = discount;
+    // Enable add to cart button
+    const addBtn = document.getElementById('addToCartBtn');
+    if (addBtn) {
+        addBtn.disabled = false;
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Smooth scroll optimization
+function smoothScroll(element) {
+    if (element) {
+        requestAnimationFrame(() => {
+            element.scrollTop = element.scrollHeight;
+        });
+    }
+}
+
+// Debounce scroll events
+let scrollTimeout;
+const chatContainer = document.getElementById('chatContainer');
+if (chatContainer) {
+    chatContainer.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            // Scroll event handling with debounce
+        }, 150);
+    }, { passive: true });
+}
+
+// Optimize addChatMessage for performance
+const originalAddChatMessage = addChatMessage;
+addChatMessage = function(sender, message) {
+    originalAddChatMessage(sender, message);
+    // Use requestAnimationFrame for smooth scroll
+    requestAnimationFrame(() => {
+        smoothScroll(chatContainer);
+    });
+};
+
+// Initialize
+initQuickPrices();
+
+// Apply initial session state: if already accepted, show agreement and enable add-to-cart
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        if (initialSessionStatus === 'accepted') {
+            // show agreement
+            if (initialFinalAgreedPrice) {
+                updateAgreement(parseFloat(initialFinalAgreedPrice), parseFloat(initialDiscount));
+            }
+            updateSessionStatus('accepted', parseFloat(initialDiscount));
+        } else {
+            // ensure add to cart is disabled if not accepted
+            const addBtn = document.getElementById('addToCartBtn');
+            if (addBtn) addBtn.disabled = true;
+        }
+    } catch (e) { /* ignore */ }
+});
+
+// Performance: Remove animations if needed on low-end devices
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelector('style').textContent = document.querySelector('style').textContent.replace(/animation:.+?;/g, 'animation: none;');
+}
+
+// Disable animations during scroll for better performance
+let isScrolling = false;
+if (chatContainer) {
+    chatContainer.addEventListener('scroll', () => {
+        isScrolling = true;
+        chatContainer.style.scrollBehavior = 'auto';
+        
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+            chatContainer.style.scrollBehavior = 'smooth';
+        }, 150);
+    }, { passive: true });
+}
+
+// Add to Cart Button Handler
+let agreedPrice = originalPrice;
+let agreedDiscount = 0;
+
+document.getElementById('addToCartBtn').addEventListener('click', async () => {
+    const quantity = parseInt(document.getElementById('cartQuantity').value);
+    
+    if (!quantity || quantity < 1) {
+        alert('Please enter a valid quantity');
+        return;
+    }
+    
+    const btn = document.getElementById('addToCartBtn');
+    const cartStatus = document.getElementById('cartStatus');
+    
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding to cart...';
+    cartStatus.textContent = '';
+    
+    try {
+        // Use server endpoint that validates session acceptance
+        const response = await fetch(`/shop/add-to-cart/${sessionId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ quantity: quantity })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            cartStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i> <strong style="color: #22c55e;">Added to cart successfully!</strong>';
+            cartStatus.style.color = '#22c55e';
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+                document.getElementById('cartQuantity').value = 1;
+            }, 2000);
+        } else {
+            cartStatus.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> <strong style="color: #ef4444;">Error adding to cart</strong>';
+            cartStatus.style.color = '#ef4444';
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        cartStatus.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> <strong style="color: #ef4444;">Error: ' + error.message + '</strong>';
+        cartStatus.style.color = '#ef4444';
+        
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+    }
+});
+
+// Update agreed price when deal is accepted
+const originalUpdateAgreement = window.updateAgreement;
+window.updateAgreement = function(price, discount) {
+    agreedPrice = price;
+    agreedDiscount = discount;
+    originalUpdateAgreement(price, discount);
+};
+</script>
+{% endblock %}

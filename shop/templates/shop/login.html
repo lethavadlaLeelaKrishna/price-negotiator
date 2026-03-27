@@ -1,0 +1,225 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Login - Price Negotiator{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-100 d-flex align-items-center">
+        <div class="col-md-5">
+            <div class="card" style="border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="card-title fw-bold" style="color: black;">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </h2>
+                        <p id="typing-text" class="text-muted" style="color: black; min-height: 24px;">Welcome back! Sign in to your account</p>
+                        <div id="message-box" style="display: none; margin-top: 12px; padding: 12px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2); color: black; font-size: 14px;"></div>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                        {% if next %}
+                            <input type="hidden" name="next" value="{{ next }}">
+                        {% endif %}
+
+                        <!-- Login Stage 1 removed: simplified login flow -->
+
+                        <!-- Login Stage 2: Credentials Entry -->
+                        <div class="login-stage p-4" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 24px;">
+                            <h5 class="mb-4" style="color: var(--primary-color); font-weight: 600;">
+                                <i class="fas fa-lock"></i>Enter Your Credentials
+                            </h5>
+
+                            <div class="mb-4">
+                                <label for="id_username" class="form-label" style="font-size: 16px; font-weight: 500; margin-bottom: 12px; display: block; color: black;">
+                                    <i class="fas fa-user" style="margin-right: 8px; color: var(--primary-color);"></i> Username
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" name="username" id="id_username" class="form-control" placeholder="Username" value="{{ form.username.value|default:'venkat7373' }}">
+                                </div>
+                                {% if form.username.errors %}
+                                    <div class="alert alert-danger small mt-2 mb-0">
+                                        {% for error in form.username.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="id_password" class="form-label" style="font-size: 16px; font-weight: 500; margin-bottom: 12px; display: block; color: black;">
+                                    <i class="fas fa-key" style="margin-right: 8px; color: var(--primary-color);"></i> Password
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" name="password" id="id_password" class="form-control" placeholder="Password" value="">
+                                </div>
+                                {% if form.password.errors %}
+                                    <div class="alert alert-danger small mt-2 mb-0">
+                                        {% for error in form.password.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" style="font-size: 16px; font-weight: 600; padding: 12px;">
+                            <i class="fas fa-check-circle"></i> Sign In
+                        </button>
+
+                        
+                        <button type="button" id="skip-login-btn" class="btn btn-outline-light btn-sm w-100" style="color: black;">
+                            <i class="fas fa-arrow-right"></i> Skip Login and Browse
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <div class="text-center">
+                        <p class="mb-0" style="color: black;">Don't have an account? 
+                            <a href="{% url 'shop:register' %}" class="fw-bold text-decoration-none" style="color: black;">
+                                Create one now
+                            </a>
+                        </p>
+                    </div>
+
+                    
+                </div>
+            </div>
+
+            <div class="text-center mt-4 text-white">
+                <p>
+                    <i class="fas fa-lock"></i> Secure login with encrypted connection
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        background: #ffffff;
+        border: 1px solid #dddddd;
+        color: black;
+        border-radius: 8px;
+        padding: 10px 15px;
+    }
+
+    .form-control::placeholder {
+        color: #6c757d;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background: #ffffff;
+        border-color: var(--accent-color);
+        color: black;
+        box-shadow: 0 0 0 0.2rem rgba(197, 160, 89, 0.25);
+    }
+
+    .form-label {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    a {
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    a:hover {
+        color: var(--secondary-color);
+    }
+
+    .typing-cursor {
+        animation: blink 0.7s infinite;
+    }
+
+    @keyframes blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+    }
+</style>
+
+<script>
+    // Typing animation
+    const typingText = "Welcome back! Sign in to your account";
+    const typingElement = document.getElementById('typing-text');
+    const messageBox = document.getElementById('message-box');
+    let typingIndex = 0;
+
+    function typeText() {
+        if (typingIndex < typingText.length) {
+            typingElement.textContent = typingText.substring(0, typingIndex + 1);
+            if (typingIndex < typingText.length - 1) {
+                typingElement.textContent += '|';
+            }
+            typingIndex++;
+            setTimeout(typeText, 50);
+        } else {
+            typingElement.textContent = typingText;
+        }
+    }
+
+    // Display welcome message in text box
+    function displayWelcomeMessage() {
+        setTimeout(() => {
+            messageBox.style.display = 'block';
+            messageBox.textContent = '✓ Ready to sign in! Enter your credentials below.';
+        }, typingText.length * 50 + 500);
+    }
+
+    // Track form input
+    document.addEventListener('DOMContentLoaded', function() {
+        typeText();
+        displayWelcomeMessage();
+
+        // Show input messages
+        const firstNameInput = document.getElementById('id_first_name');
+        const lastNameInput = document.getElementById('id_last_name');
+        const usernameInput = document.getElementById('id_username');
+
+        [firstNameInput, lastNameInput, usernameInput].forEach(input => {
+            if (input) {
+                input.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        const fieldName = this.labels[0]?.textContent || 'Field';
+                        messageBox.textContent = `✓ ${fieldName}: ${this.value}`;
+                        messageBox.style.display = 'block';
+                    }
+                });
+            }
+        });
+
+        // Skip-login run button handler
+        const skipBtn = document.getElementById('skip-login-btn');
+        if (skipBtn) {
+            skipBtn.addEventListener('click', function() {
+                // navigate to product list
+                window.location.href = "{% url 'shop:product_list' %}";
+            });
+        }
+    });
+</script>
+
+{% endblock %}

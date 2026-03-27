@@ -1,0 +1,14 @@
+Order ID: 2
+User: admin2 (anjibabu89@gmail.com)
+Full Name: Anji babu Lethavadla
+Address: kondrapadu, guntur, ap - 121551
+
+Items:
+ - Premium Laptop x1 @ ₹999.11 = ₹999.11
+ - Women's Cashmere Scarf x10 @ ₹75.99 = ₹759.90
+
+Subtotal: ₹1759.01
+Tax (10%): ₹175.90
+Total: ₹1934.91
+
+Thank you for your purchase!

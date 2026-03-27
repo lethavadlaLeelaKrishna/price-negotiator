@@ -1,0 +1,14 @@
+Order ID: 4
+User: admin (admin@example.com)
+Full Name: Leela Krishna Lethavadla
+Address: spn, gutr, ap - 373900
+
+Items:
+ - Casual Chic Ensemble x1 @ ₹4500.00 = ₹4500.00
+ - Wall Art Canvas Print x30 @ ₹2520.00 = ₹75600.00
+
+Subtotal: ₹80100.00
+Tax (10%): ₹8010.00
+Total: ₹88110.00
+
+Thank you for your purchase!

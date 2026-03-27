@@ -1,0 +1,13 @@
+Order ID: 3
+User: admin2 (lllllathavadla@gmail.com)
+Full Name: leela
+Address: Guntur, guntur, ap - 124512
+
+Items:
+ - Women's Cashmere Scarf x6 @ ₹71.99 = ₹431.94
+
+Subtotal: ₹431.94
+Tax (10%): ₹43.19
+Total: ₹475.13
+
+Thank you for your purchase!

@@ -1,0 +1,13 @@
+Order ID: 6
+User: krishna7373 (lllllethavadla@gmail.com)
+Full Name: krishna Latvala
+Address: kondrapadu, guntur, up - 522025
+
+Items:
+ - Women's Cashmere Scarf x1 @ ₹67.99 = ₹67.99
+
+Subtotal: ₹67.99
+Tax (10%): ₹6.80
+Total: ₹74.79
+
+Thank you for your purchase!

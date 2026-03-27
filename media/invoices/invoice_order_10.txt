@@ -1,0 +1,15 @@
+Order ID: 10
+User: venkat7373 (llleelavenkat12@gmail.com)
+Full Name: venkat Lethavadla
+Address: kondrapadu, guntur, andra pradesh - 522019
+
+Items:
+ - Kid's Hoodie x1 @ ₹28.00 = ₹28.00
+ - Kid's Hoodie x1 @ ₹28.00 = ₹28.00
+ - Kid's Hoodie x40 @ ₹28.00 = ₹1120.00
+
+Subtotal: ₹1176.00
+Tax (10%): ₹117.60
+Total: ₹1293.60
+
+Thank you for your purchase!

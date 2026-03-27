@@ -1,0 +1,17 @@
+Order ID: 1
+User: admin2 (lllllathavadla@gmail.com)
+Full Name: leela
+Address: kondrapadu, guntur, a - 121551
+
+Items:
+ - Portable SSD 1TB x13 @ ₹123.49 = ₹1605.37
+ - Men's Classic Tee x1 @ ₹24.99 = ₹24.99
+ - Men's Classic Tee x1 @ ₹24.99 = ₹24.99
+ - Men's Classic Tee x1 @ ₹23.74 = ₹23.74
+ - Unisex Baseball Cap x1 @ ₹19.00 = ₹19.00
+
+Subtotal: ₹1698.09
+Tax (10%): ₹169.81
+Total: ₹1867.90
+
+Thank you for your purchase!

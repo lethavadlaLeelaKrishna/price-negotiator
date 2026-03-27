@@ -1,0 +1,226 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Register - Price Negotiator{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-100 d-flex align-items-center">
+        <div class="col-12 col-lg-10">
+            <div class="card" style="border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="card-title fw-bold" style="color: black;">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </h2>
+                        <p id="typing-text" class="text-muted" style="color: black; min-height: 24px;">Join us and start negotiating for better prices!</p>
+                        <div id="message-box" style="display: none; margin-top: 12px; padding: 12px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2); color: black; font-size: 14px;"></div>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row g-4">
+                            <div class="col-12 col-lg-6">
+                                <!-- Stage 1: Personal Information & Credentials -->
+                                <div class="stage-section h-100 p-4" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <h5 class="mb-4" style="color: var(--primary-color); font-weight: 600;">
+                                        <i class="fas fa-user-circle"></i> Step 1: Personal Information
+                                    </h5>
+    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="id_first_name" class="form-label fw-500 text-dark">
+                                                <i class="fas fa-id-card"></i> First Name
+                                            </label>
+                                            {{ form.first_name }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="id_last_name" class="form-label fw-500 text-dark">
+                                                <i class="fas fa-id-card"></i> Last Name
+                                            </label>
+                                            {{ form.last_name }}
+                                        </div>
+                                    </div>
+    
+                                    <div class="mb-4">
+                                        <label for="id_email" class="form-label" style="font-weight: 500; color: black;">
+                                            <i class="fas fa-envelope"></i> Email Address
+                                        </label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="alert alert-danger small mt-1">
+                                                {% for error in form.email.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <!-- Stage 2: Account Credentials -->
+                                <div class="stage-section h-100 p-4" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <h5 class="mb-4" style="color: var(--primary-color); font-weight: 600;">
+                                        <i class="fas fa-lock"></i> Step 2: Account Credentials
+                                    </h5>
+    
+                                    <p class="fw-600 mb-2" style="color: black;">Enter Your Credentials</p>
+    
+                                    <div class="mb-3">
+                                        <label for="id_username" class="form-label fw-500 text-dark">
+                                            <i class="fas fa-user"></i> Username (optional)
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            {{ form.username }}
+                                        </div>
+                                        {% if form.username.errors %}
+                                            <div class="alert alert-danger small mt-1">
+                                                {% for error in form.username.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">If left blank, we'll generate a username from your email.</small>
+                                    </div>
+    
+                                    <div class="mb-3">
+                                        <label for="id_password1" class="form-label fw-500 text-dark">
+                                            <i class="fas fa-lock"></i> Password
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                            {{ form.password1 }}
+                                        </div>
+                                        {% if form.password1.errors %}
+                                            <div class="alert alert-danger small mt-1">
+                                                {% for error in form.password1.errors %}
+                                                    <p class="mb-1">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">
+                                            <i class="fas fa-info-circle"></i> At least 8 characters with mix of letters and numbers
+                                        </small>
+                                    </div>
+    
+                                    <div class="mb-2">
+                                        <label for="id_password2" class="form-label fw-500 text-dark">
+                                            <i class="fas fa-check-circle"></i> Confirm Password
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-check-circle"></i></span>
+                                            {{ form.password2 }}
+                                        </div>
+                                        {% if form.password2.errors %}
+                                            <div class="alert alert-danger small mt-1">
+                                                {% for error in form.password2.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3 mt-4">
+                            <i class="fas fa-user-check"></i> Create Account
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <div class="text-center">
+                        <p class="mb-0" style="color: black;">Already have an account? 
+                            <a href="{% url 'shop:login' %}" class="fw-bold text-decoration-none" style="color: black;">
+                                Sign In
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 text-white">
+                <p>
+                    <i class="fas fa-shield-alt"></i> Your account is secure and your data is protected
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Minimal tweaks; rely on Bootstrap for styling */
+    .form-label { font-weight: 600; }
+    .card { background: #fff; }
+</style>
+
+<script>
+    // Typing animation
+    const typingText = "Join us and start negotiating for better prices!";
+    const typingElement = document.getElementById('typing-text');
+    const messageBox = document.getElementById('message-box');
+    let typingIndex = 0;
+
+    function typeText() {
+        if (typingIndex < typingText.length) {
+            typingElement.textContent = typingText.substring(0, typingIndex + 1);
+            if (typingIndex < typingText.length - 1) {
+                typingElement.textContent += '|';
+            }
+            typingIndex++;
+            setTimeout(typeText, 50);
+        } else {
+            typingElement.textContent = typingText;
+        }
+    }
+
+    // Display welcome message in text box
+    function displayWelcomeMessage() {
+        setTimeout(() => {
+            messageBox.style.display = 'block';
+            messageBox.textContent = '✓ Welcome! Please fill in your details to create an account.';
+        }, typingText.length * 50 + 500);
+    }
+
+        // Track form input
+    document.addEventListener('DOMContentLoaded', function() {
+        typeText();
+        displayWelcomeMessage();
+
+        // Show input messages
+        const firstNameInput = document.getElementById('id_first_name');
+        const lastNameInput = document.getElementById('id_last_name');
+        const emailInput = document.getElementById('id_email');
+            [firstNameInput, lastNameInput, emailInput].forEach(input => {
+            if (input) {
+                input.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        const fieldName = this.labels[0]?.textContent || 'Field';
+                        messageBox.textContent = `✓ ${fieldName}: ${this.value}`;
+                        messageBox.style.display = 'block';
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+{% endblock %}
