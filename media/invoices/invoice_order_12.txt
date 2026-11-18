@@ -1,0 +1,13 @@
+Order ID: 12
+User: venkat7373 (llleelavenkat12@gmail.com)
+Full Name: venkat Lethavadla
+Address: kondrapadu, guntur, ap - 522019
+
+Items:
+ - Men's Quilted Jacket x1 @ ₹80.00 = ₹80.00
+
+Subtotal: ₹80.00
+Tax (10%): ₹8.00
+Total: ₹88.00
+
+Thank you for your purchase!

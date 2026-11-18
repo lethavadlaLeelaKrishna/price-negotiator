@@ -28,13 +28,10 @@ if settings.DEBUG:
 
 urlpatterns += [
     path('admin/', admin.site.urls),
-    # Include shop app URLs under the 'shop' namespace. This registers the
-    # 'shop' namespace so templates can use names like 'shop:product_detail'.
-    # Register both namespaced and non-namespaced includes so legacy
-    # reverse() calls (tests or external code) that rely on un-namespaced
-    # URL names keep working.
+    # Include shop app URLs. Because shop.urls defines app_name='shop', this
+    # single include registers the 'shop' namespace (e.g. 'shop:product_detail')
+    # as well as serving the routes at the root path.
     path('', include('shop.urls')),
-    path('', include(('shop.urls', 'shop'), namespace='shop')),
     # Legacy non-namespaced routes (explicitly declared) to support tests and
     # any code that expects these names without the 'shop:' namespace.
     path('shop/send-text-offer/<str:session_id>/', shop_views.send_text_offer, name='send_text_offer'),

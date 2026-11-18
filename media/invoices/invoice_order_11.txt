@@ -1,0 +1,13 @@
+Order ID: 11
+User: venkat7373 (llleelavenkat12@gmail.com)
+Full Name: venkat Lethavadla
+Address: kondrapadu, guntur, ap - 522019
+
+Items:
+ - Women's Cashmere Scarf x10 @ ₹72.00 = ₹720.00
+
+Subtotal: ₹720.00
+Tax (10%): ₹72.00
+Total: ₹792.00
+
+Thank you for your purchase!

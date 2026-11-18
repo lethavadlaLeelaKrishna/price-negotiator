@@ -6,6 +6,13 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # Add env_old's site-packages to path - it has all dependencies!
+    site_packages = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), 'env_old', 'Lib', 'site-packages')
+    )
+    if site_packages not in sys.path:
+        sys.path.insert(0, site_packages)
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chatbot.settings')
     try:
         from django.core.management import execute_from_command_line
